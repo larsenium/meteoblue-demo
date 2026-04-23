@@ -13,7 +13,6 @@ interface MeteoData {
     precipitation: number[];
     isdaylight: number[];
     pictocode: number[];
-    // Add more fields as needed
   };
   data_day: {
     time: string[];
@@ -49,7 +48,7 @@ export default function WeatherPage() {
   if (!data) return <div className="p-8 text-red-500">Error loading data</div>;
 
   const today = data.data_day.time[0];
-  const currentTemp = data.data_1h.temperature[data.data_1h.time.length - 1];
+  const currentTemp = Math.round(data.data_1h.temperature[data.data_1h.time.length - 1]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
@@ -59,7 +58,7 @@ export default function WeatherPage() {
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
             {data.metadata.name}
           </h1>
-          <p className="text-3xl text-gray-700 mb-1">{currentTemp.toFixed(1)}°C</p>
+          <p className="text-3xl text-gray-700 mb-1">{currentTemp}°C</p>
           <p className="text-lg text-gray-500">
             {data.metadata.latitude.toFixed(3)}, {data.metadata.longitude.toFixed(3)}
           </p>
@@ -67,11 +66,11 @@ export default function WeatherPage() {
 
         {/* Daily Summary */}
         <section className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 shadow-xl mb-8">
-          <h2 className="text-2xl font-bold mb-6">Daily Forecast</h2>
+          <h2 className="text-2xl font-bold mb-6">Daily Forecast (°C)</h2>
           <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
             {data.data_day.time.slice(0, 7).map((date, i) => {
-              const maxT = data.data_day.temperature_max[i];
-              const minT = data.data_day.temperature_min[i];
+              const maxT = Math.round(data.data_day.temperature_max[i]);
+              const minT = Math.round(data.data_day.temperature_min[i]);
               const precip = data.data_day.precipitation[i];
               return (
                 <div key={date} className="text-center p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all">
@@ -91,12 +90,12 @@ export default function WeatherPage() {
 
         {/* Hourly Forecast */}
         <section className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 shadow-xl">
-          <h2 className="text-2xl font-bold mb-6">Next 24 Hours</h2>
+          <h2 className="text-2xl font-bold mb-6">Next 24 Hours (°C)</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 overflow-x-auto pb-4">
             {data.data_1h.time.slice(-24).map((time, i) => {
               const idx = data.data_1h.time.length - 24 + i;
-              const temp = data.data_1h.temperature[idx];
-              const wind = data.data_1h.windspeed[idx];
+              const temp = Math.round(data.data_1h.temperature[idx]);
+              const wind = Math.round(data.data_1h.windspeed[idx] * 10) / 10; // 1 decimal for wind
               const precipProb = data.data_1h.precipitation_probability[idx];
               const isDay = data.data_1h.isdaylight[idx];
 
@@ -105,9 +104,9 @@ export default function WeatherPage() {
                   <div className="text-xs text-gray-500">
                     {new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
-                  <div className="text-2xl font-bold text-gray-800 mt-1">{temp.toFixed(1)}°</div>
+                  <div className="text-2xl font-bold text-gray-800 mt-1">{temp}°</div>
                   <div className="flex items-center justify-center gap-1 text-sm text-gray-600 mt-2">
-                    <span>{wind.toFixed(1)}m/s</span>
+                    <span>{wind}m/s</span>
                     {precipProb > 20 && (
                       <span className="ml-1 text-blue-500">● {precipProb}%</span>
                     )}
